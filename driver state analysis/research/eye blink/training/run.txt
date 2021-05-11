@@ -1,0 +1,8 @@
+python evaluate_shape_predictor.py --predictor eye_predictor.dat \
+	--xml ibug_300W_large_face_landmark_dataset/ibug_300W_large_face_landmark_dataset/labels_ibug_300W_train.xml
+
+python train_shape_predictor.py \
+	--training ibug_300W_large_face_landmark_dataset/ibug_300W_large_face_landmark_dataset/labels_ibug_300W_train.xml \
+	--model eye_predictor.dat
+
+py -3.7 evaluate_shape_predictor.py --predictor shape_predictor_68_face_landmarks.dat --xml ibug_300W_large_face_landmark_dataset/ibug_300W_large_face_landmark_dataset/labels_ibug_300W_train.xml
