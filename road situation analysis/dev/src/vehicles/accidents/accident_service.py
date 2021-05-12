@@ -18,39 +18,52 @@ import imutils
 import time
 import dlib
 import cv2
+import pickle
 import pyttsx3
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from collections import deque
+from tensorflow.keras.models import load_model
 
  
-class RoadMonitor:
+class AccidentService:
 
 	def __init__(self, args):
 
 		# build models
 
-		print("[INFO] loading tracking model...")
-		self.detector = load_centertrack()
-		
+		print("[INFO] loading accident recognition model...")
+		self.classifier = load_model('models/accident_classifier.hdf5')
+
 		# variables
 
-		self.cnt = 0
-
-		self.danger_scale_value_ear = 1
-		self.danger_scale_value_activity = 1
+		self.were_in_accident = set()
+		self.label_mapping = {
+			0: 'normal',
+			1: 'accident'
+		}
+		self.num_accidents = 0
 
  
-	def process(self, frame):
+	def process(self, frame_queue, detection_result):
 
-		self.cnt += 1
+		for det in detection_result:
+			x_min, y_min, x_max, y_max = det['2d_bbox']
+			x_min = max(0, x_min - 50)
+			y_min = max(0, y_min - 50)
+			x_max = min(frame_queue[-1].shape[1] - 1, x_max + 50)
+			y_max = min(frame_queue[-1].shape[0] - 1, y_max + 50)
 
-		
+			crop = frame_queue[-1][x_min: x_max + 1, y_min: y_max + 1, :]
+			crop = cv2.resize(crop, (28, 28), interpolation=cv2.INTER_AREA)
+			pred = self.classifier.predict(np.expand_dims(crop, 0))[0]
+			is_accident = self.label_mapping[pred]
 
+			if not det['id'] in self.were_in_accident:
+				print("Warning! Accident detected.")
+				self.num_accidents += 1
+				self.were_in_accident.add(det['id'])
 
-		return {
-			'frame': frame,
-			'activity_class': self.classes[self.activity_states[-1]] if self.activity_states else None,
-			'ear': round(ear * 100, 2),
-			'danger_scale_value': danger_scale_value
-		}
+				pickle_data = {'type': "accident", 'frames': frame_queue}
+				pickle_path = f"database/accidents/{self.num_accidents}.pkl"
+				pickle.dump(pickle_data, open(pickle_path, 'wb'))
  

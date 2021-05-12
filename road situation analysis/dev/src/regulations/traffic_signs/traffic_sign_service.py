@@ -103,8 +103,8 @@ class TrafficSignService:
 		if img is None:
 			traffic_sign = None
 		else:
-			img = cv2.resize(img, (48, 48), interpolation=cv2.INTER_CUBIC)
-			pred = self.classifier.predict(np.expand_dims(image, 0))[0]
+			img = cv2.resize(img, (48, 48), interpolation=cv2.INTER_AREA)
+			pred = self.classifier.predict(np.expand_dims(img, 0))[0]
 			if pred in self.traffic_sign_relevant_states:
 				traffic_sign = self.traffic_sign_relevant_states[pred]
 			else:

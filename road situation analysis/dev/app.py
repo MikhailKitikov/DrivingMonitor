@@ -40,10 +40,10 @@ class App:
 		self.canvas.pack()
 
 		# radio buttons
-		self.display_mode = IntVar()
-        Radiobutton(self.window, text="Main", variable=self.display_mode, value=0).pack(anchor=S)
-        Radiobutton(self.window, text="Depth", variable=self.display_mode, value=1).pack(anchor=S)
-        Radiobutton(self.window, text="Bird's-eye view", variable=self.display_mode, value=2).pack(anchor=S)
+		# self.display_mode = IntVar()
+  #       Radiobutton(self.window, text="Main", variable=self.display_mode, value=0).pack(anchor=S)
+  #       Radiobutton(self.window, text="Depth", variable=self.display_mode, value=1).pack(anchor=S)
+  #       Radiobutton(self.window, text="Bird's-eye view", variable=self.display_mode, value=2).pack(anchor=S)
 
 		# info elements
 		# self.danger_scale_img = PIL.Image.open("assets/images/danger_scale_1.png")
@@ -68,8 +68,8 @@ class App:
 		# self.danger_scale_value_ear = 1
 		# self.danger_scale_value_activity = 1
 
-		self.engine = pyttsx3.init()
-		self.engine.setProperty('volume', 1.0)
+		# self.engine = pyttsx3.init()
+		# self.engine.setProperty('volume', 1.0)
 		
 		# settings
 		self.delay = 5
@@ -83,25 +83,6 @@ class App:
 		ret, frame = self.vid.get_frame()
 		if not ret:
 			return
-
-		# eye blink
-
-		# self.ear_states.append(int(ear < self.EYE_AR_THRESH))
-
-		# if len(self.ear_states) >= self.ear_states.maxlen:
-
-		# 	closed_eyes_frac = np.mean(self.ear_states)
-		# 	self.danger_scale_value_ear = max(1, min(10, int(round(closed_eyes_frac * 10))))
-
-		# 	if self.danger_scale_value_ear > 5:
-		# 		if not self.ALARM_ON:
-		# 			self.ALARM_ON = True
-		# 			alarm_thread = Thread(target=self.sound_alarm, args=("assets/alarm.wav",))
-		# 			alarm_thread.deamon = True
-		# 			alarm_thread.start()
-		# 			# cv2.putText(frame, "DROWSINESS ALERT!", (120, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-		# 	else:
-		# 		self.ALARM_ON = False
 
 		# danger scale
 
@@ -126,17 +107,6 @@ class App:
 		self.engine.runAndWait()
 		playsound.playsound(path)
 
-
-	# def run_activity(self, frame):
-
-	# 	frame = cv2.resize(frame, (224, 224)).astype('float32')
-	# 	if self.activity_model_.startswith('mobilenet-v2'):
-	# 		frame = preprocess_input(frame)
-
-	# 	pred = self.activity_model(frame[np.newaxis, ...])[0]
-
-	# 	return np.argmax(pred)
-		
 
 	def quit(self):
 		if self.vid:

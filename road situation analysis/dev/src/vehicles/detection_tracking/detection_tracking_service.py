@@ -43,9 +43,9 @@ from opts import opts
 from detector import Detector
 
  
-class DetectionService:
+class DetectionTrackingService:
 
-	def __init__(self, args):
+	def __init__(self):
 		
 		# build model
 
@@ -84,6 +84,7 @@ class DetectionService:
 
 		return {
 			'id': det['tracking_id'],
-			'center': det['loc']
+			'center': det['loc'],
+			'2d_bbox': det['bbox']
 		}
  

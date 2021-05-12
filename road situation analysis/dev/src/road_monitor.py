@@ -22,35 +22,92 @@ import pyttsx3
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from collections import deque
 
+from src.regulations.traffic_lights.traffic_light_service import TrafficLightService
+from src.regulations.traffic_signs.traffic_sign_service import TrafficSignService
+from src.regulations.violation.speed_limits_violation_service import SpeedLimitsViolationService
+
+from src.road.lane_detection.lane_detection_service import LaneDetectionService
+from src.road.state_estimation.state_estimation_service import StateEstimationService
+
+from src.vehicles.accidents.accident_service import AccidentService
+from src.vehicles.collisions.collision_service import CollisionService
+from src.vehicles.detection_tracking.detection_tracking_service import DetectionTrackingService
+from src.vehicles.number_plate_recognition.number_plate_recognition_service import NumberPlateRecognitionService 
+
  
 class RoadMonitor:
 
 	def __init__(self, args):
 
-		# build models
+		# modules
 
-		print("[INFO] loading tracking model...")
-		self.detector = load_centertrack()
+		self.traffic_light_service = TrafficLightService()
+		self.traffic_sign_service = TrafficSignService()
+		self.speed_limits_violation_service = SpeedLimitsViolationService()
+		self.lane_detection_service = LaneDetectionService()
+		self.state_estimation_service = StateEstimationService()
+		self.accident_service = AccidentService()
+		self.collision_service = CollisionService()
+		self.detection_tracking_service = DetectionTrackingService()
 		
 		# variables
 
 		self.cnt = 0
-
-		self.danger_scale_value_ear = 1
-		self.danger_scale_value_activity = 1
+		self.frame_queue = deque(maxlen=100)
+		self.detection_queue = deque(maxlen=100)
+		self.current_car_ids = set()
 
  
 	def process(self, frame):
 
 		self.cnt += 1
+		self.frame_queue.append(frame)
 
-		
+		# state estimation
 
+		ego_state = self.state_estimation_service.process(frame)
+
+		# lane detection
+
+		...
+
+		# traffic sign detection
+
+		...
+
+		# traffic light detection
+
+		...
+
+		# dynamic object detection
+
+		detection_result = self.detection_tracking_service.process(frame)
+		detection_cars = detection_result['car']
+		detection_pedestrians = detection_result['pedestrian']
+		self.detection_queue.append(detection_cars)
+
+		# tracking
+
+		new_car_ids = set(car['id'] for car in detection_cars)
+		self.current_car_ids = new_car_ids
+
+		# collision prediction
+
+		...
+
+		# accident recognition
+
+		self.accident_service.process(self.frame_queue, detection_result)
+
+		# speed limit violation detection
+
+		...
+
+		# number plate recognition
+
+		...
 
 		return {
-			'frame': frame,
-			'activity_class': self.classes[self.activity_states[-1]] if self.activity_states else None,
-			'ear': round(ear * 100, 2),
-			'danger_scale_value': danger_scale_value
+			
 		}
  

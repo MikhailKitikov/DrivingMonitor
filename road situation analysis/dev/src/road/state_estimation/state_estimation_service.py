@@ -48,7 +48,7 @@ from src.kalman.kalman_filter import kalman_transit_covariance, kalman_process_o
  
 class StateEstimationService:
 
-	def __init__(self, args):
+	def __init__(self):
 
 		# build models
 
