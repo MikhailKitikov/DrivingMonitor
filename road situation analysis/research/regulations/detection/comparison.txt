@@ -1,0 +1,5 @@
+faster_rcnn_resnet_101: 	Mean AP = 0.8861 	time gpu: 1.1s
+faster rcnn inception v2: 	Mean AP = 0.5884 	time gpu: 0.25s
+ssd inception v2: 		Mean AP = 0.4262 	time gpu: 0.18s
+ssd_mobilenet_v1: 		Mean AP = 0.5132 	time gpu: 0.11s
+
