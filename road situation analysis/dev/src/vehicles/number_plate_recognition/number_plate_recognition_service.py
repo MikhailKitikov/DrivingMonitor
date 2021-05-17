@@ -31,6 +31,7 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
 import pytesseract
+pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
  
 class NumberPlateRecognitionService:
@@ -48,10 +49,8 @@ class NumberPlateRecognitionService:
 				graph_def.ParseFromString(file.read())
 				tf.import_graph_def(graph_def, name="")
 
-		pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-
  
-	def process(self, frame):
+	def process(self, img, draw_number=False):
 
 		# detect
 
@@ -63,8 +62,8 @@ class NumberPlateRecognitionService:
 				detection_classes = self.graph.get_tensor_by_name('detection_classes:0')
 				num_detections = self.graph.get_tensor_by_name('num_detections:0')
 
-				image_exp = frame[None, ...]
-				im_height, im_width = frame.shape[:2]
+				image_exp = img[None, ...]
+				im_height, im_width = img.shape[:2]
 
 				boxes, scores, classes, num = sess.run(
 				  [detection_boxes, detection_scores, detection_classes, num_detections],
@@ -79,20 +78,16 @@ class NumberPlateRecognitionService:
 		crop = sess.run(tf.image.crop_to_bounding_box(frame, ymin, xmin, ymax - ymin, xmax - xmin))
 		crop = self.preprocess_img(crop)
 
-		text = pytesseract.image_to_string(crop, config ='--oem 3 -l eng --psm 6')
+		text = pytesseract.image_to_string(crop, config ="-l eng --oem 3 --psm 6")
 		text = self.verify_text(text)
 
-		font = cv2.FONT_HERSHEY_SIMPLEX
-		org = (50, 50)
-		fontScale = 1
-		color = (255, 0, 0)
-		thickness = 1
-		
-		frame = cv2.putText(frame, text, org, font, fontScale, color, thickness, cv2.LINE_AA)
+		if draw_number and len(text):
+			font, org, fontScale, color, thickness = cv2.FONT_HERSHEY_SIMPLEX, (50, 50), 1, (255, 0, 0), 1		
+			frame = cv2.putText(frame, text, org, font, fontScale, color, thickness, cv2.LINE_AA)
 
 		return {
 			'frame': frame,
-			'number': text,
+			'number_plate': text if len(text) else None,
 		}
 
 

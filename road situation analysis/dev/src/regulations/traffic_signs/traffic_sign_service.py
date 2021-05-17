@@ -95,23 +95,17 @@ class TrafficSignService:
 					crop = self.preprocess_img(crop)
 					crops.append(crop)
 
-				crops = list(sorted(crops, key=lambda crop: - crop.shape[0] * crop.shape[1]))
-				img = crops[0] if len(crops) else None
-
 		# classify
 
-		if img is None:
-			traffic_sign = None
-		else:
+		traffic_signs = []
+
+		for img in crops:
 			img = cv2.resize(img, (48, 48), interpolation=cv2.INTER_AREA)
 			pred = self.classifier.predict(np.expand_dims(img, 0))[0]
 			if pred in self.traffic_sign_relevant_states:
 				traffic_sign = self.traffic_sign_relevant_states[pred]
-			else:
-				traffic_sign = None
+				print(f"Warning! Traffic sign '{traffic_sign}' detected.")
+				traffic_signs.append(traffic_sign)
 
-		return {
-			'frame': frame,
-			'traffic_sign': traffic_sign
-		}
+		return traffic_signs
  

@@ -32,7 +32,6 @@ from src.road.state_estimation.state_estimation_service import StateEstimationSe
 from src.vehicles.accidents.accident_service import AccidentService
 from src.vehicles.collisions.collision_service import CollisionService
 from src.vehicles.detection_tracking.detection_tracking_service import DetectionTrackingService
-from src.vehicles.number_plate_recognition.number_plate_recognition_service import NumberPlateRecognitionService 
 
  
 class RoadMonitor:
@@ -56,28 +55,42 @@ class RoadMonitor:
 		self.frame_queue = deque(maxlen=100)
 		self.detection_queue = deque(maxlen=100)
 		self.current_car_ids = set()
+		self.prev_time = time.time()
+		self.curr_max_speed = 110
+		self.prev_ego_state = None
 
  
 	def process(self, frame):
+
+		new_time = time.time()
+		dt = new_time - self.prev_time
+		self.prev_time = new_time
 
 		self.cnt += 1
 		self.frame_queue.append(frame)
 
 		# state estimation
 
-		ego_state = self.state_estimation_service.process(frame)
+		ego_state = self.state_estimation_service.process(frame, dt)
+		print(f"[INFO] Current state: {ego_state}")
 
 		# lane detection
 
-		...
+		frame = self.lane_detection_service.process(frame)
 
 		# traffic sign detection
 
-		...
+		traffic_signs = self.traffic_sign_service.process(frame)
+		for traffic_sign in traffic_signs:
+			if traffic_sign.startswith('speed'):
+				new_max_speed = int(traffic_sign[6:])
+				print(f"Warning! New speed limit: {new_max_speed}")
 
 		# traffic light detection
 
-		...
+		traffic_light_color = self.traffic_light_service.process(frame)
+		if traffic_light_color != 'green':
+			print(f"Warning! Traffic light color: {traffic_light_color}")
 
 		# dynamic object detection
 
@@ -93,21 +106,18 @@ class RoadMonitor:
 
 		# collision prediction
 
-		...
+		self.collision_service.process(self.detection_queue, current_car_ids, dt, curr_max_speed)
 
 		# accident recognition
 
 		self.accident_service.process(self.frame_queue, detection_result)
 
-		# speed limit violation detection
+		# speed limit violation detection & number plate recognition
 
-		...
+		self.speed_limits_violation_service.process(self.prev_ego_state, ego_state, self.frame_queue, self.detection_queue, 
+			self.current_car_ids, new_time, dt, self.curr_max_speed)
 
-		# number plate recognition
+		# update variables
 
-		...
-
-		return {
-			
-		}
+		self.prev_ego_state = ego_state
  

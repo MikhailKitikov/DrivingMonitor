@@ -57,16 +57,8 @@ class StateEstimationService:
 		self.car = self.create_car(initial_omega=0.05)
 		self.kalman_car = self.create_kalman_car(car)
 
-		# variables
-
-		self.prev_time = time.time()
-
  
-	def process(self, frame):
-
-		new_time = time.time()
-		dt = new_time - self.prev_time
-		self.prev_time = new_time
+	def process(self, frame, dt):
 
 		self.car.move(dt)
 		self.kalman_car.move(dt)
