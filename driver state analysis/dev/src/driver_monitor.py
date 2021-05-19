@@ -22,8 +22,8 @@ import pyttsx3
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from collections import deque
 
-from src.activity_service import ActivityService
-from src.eye_blink_service import EyeBlinkService
+from src.activity.activity_service import ActivityService
+from src.drowsiness.eye_blink_service import EyeBlinkService
 
  
 class DriverMonitor:
@@ -55,8 +55,8 @@ class DriverMonitor:
 
 		eye_blink_result = self.eye_blink_sevice.process({
 			'frame': frame, 
-			'ALARM_ON': self.ALARM_ON.
-			'danger_value_threshold': danger_value_threshold}
+			'ALARM_ON': self.ALARM_ON,
+			'danger_value_threshold': self.danger_value_threshold}
 		)
 		frame = eye_blink_result['frame']
 		ear = eye_blink_result['ear']
